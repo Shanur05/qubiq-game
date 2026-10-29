@@ -1,1 +1,170 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#091127">
+<title>Qubiq — Blast Puzzle</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2d457e,#101b3b 55%,#080e20);color:#f7f9ff;font-family:system-ui,Arial,sans-serif}
+.app{max-width:480px;margin:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:36px;font-weight:950;letter-spacing:-1px;background:linear-gradient(90deg,#48e7ff,#b69aff,#ff86d3);color:transparent;background-clip:text}
+.tag{font-size:10px;letter-spacing:3px;color:#aebce0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#1b2a50;border:1px solid #3b5087;border-radius:16px;padding:12px}
+.label{font-size:11px;color:#aebce0;letter-spacing:1px}
+.value{font-size:28px;font-weight:900}
+.boardbox{padding:8px;border-radius:20px;background:linear-gradient(135deg,#6e84f2,#27396e,#3c4e9b);box-shadow:0 12px 28px #0005}
+.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;background:#0b1430;padding:7px;border-radius:14px}
+.cell{aspect-ratio:1;border-radius:5px;background:#192647;border:1px solid #2b3a60;min-width:0;padding:0}
+.cell.filled{border-color:#ffffff66;box-shadow:inset 0 2px 2px #ffffff55,inset 0 -3px 2px #0003}
+.panel{background:#172449;border:1px solid #3b5087;border-radius:18px;padding:12px}
+.paneltitle{text-align:center;font-size:11px;letter-spacing:2px;color:#aebce0;margin-bottom:10px}
+.pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.piece{height:88px;border:1px solid #465b91;border-radius:14px;background:#22345e;display:flex;align-items:center;justify-content:center}
+.piece.selected{outline:2px solid #4de5ff}
+.piece:disabled{opacity:.25}
+.mini{display:grid;gap:3px}
+.minicell{width:17px;height:17px;border-radius:4px}
+.message{text-align:center;min-height:22px;color:#a4ffe4;font-size:12px;font-weight:700}
+.buttons{display:flex;gap:9px}
+.btn{flex:1;border:0;border-radius:14px;padding:14px 8px;font-weight:800;font-size:14px;color:white}
+.primary{background:linear-gradient(100deg,#20d6a3,#20b9d8)}
+.secondary{background:#263960;border:1px solid #43598b}
+footer{text-align:center;color:#8193bf;font-size:10px}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+<div><div class="logo">Qubiq</div><div class="tag">BLAST PUZZLE</div></div>
+<button class="btn secondary" id="help" style="flex:0 0 auto">ⓘ</button>
+</header>
+<section class="stats">
+<div class="stat"><div class="label">✦ СЧЁТ</div><div class="value" id="score">0</div></div>
+<div class="stat"><div class="label">♛ РЕКОРД</div><div class="value" id="best">0</div></div>
+</section>
+<section><div class="boardbox"><div class="board" id="board"></div></div></section>
+<section class="panel"><div class="paneltitle">ВЫБЕРИ ФИГУРУ</div><div class="pieces" id="pieces"></div></section>
+<div class="message" id="message">Выбери фигуру, затем коснись поля.</div>
+<div class="buttons"><button class="btn primary" id="new">↻ Новая игра</button><button class="btn secondary" id="rules">Как играть</button></div>
+<footer>QUBIQ · СОБИРАЙ ЛИНИИ. НАБИРАЙ ОЧКИ.</footer>
+</main>
+<script>
+(()=>{
+const N=8;
+const colors=['#42d9ff','#a58aff','#ff70ba','#ffc34f','#52e6a1','#508bff','#ff876e'];
+const shapes=[
+[[0,0]],[[0,0],[1,0]],[[0,0],[0,1]],
+[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],
+[[0,0],[1,0],[0,1],[1,1]],
+[[0,0],[1,0],[2,0],[1,1]],
+[[0,0],[1,0],[2,0],[3,0]],
+[[0,0],[0,1],[0,2],[0,3]],
+[[0,0],[1,0],[2,0],[0,1],[1,1]],
+[[0,0],[0,1],[1,1],[1,2]]
+];
+const $=id=>document.getElementById(id);
+let grid=[],score=0,best=0,choices=[],selected=-1,over=false;
+try{best=Number(localStorage.getItem('qubiqBest'))||0}catch(e){}
+$('best').textContent=best;
+function newGame(){
+grid=Array.from({length:N},()=>Array(N).fill(''));
+score=0;selected=-1;over=false;
+$('score').textContent='0';
+$('message').textContent='Выбери фигуру, затем коснись поля.';
+makeChoices();drawBoard();drawPieces();
+}
+function makeChoices(){
+choices=Array.from({length:3},()=>({
+shape:shapes[Math.floor(Math.random()*shapes.length)],
+color:colors[Math.floor(Math.random()*colors.length)],
+used:false
+}));
+selected=-1;
+}
+function drawBoard(){
+const b=$('board');b.innerHTML='';
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+const el=document.createElement('button');
+el.type='button';el.className='cell'+(grid[r][c]?' filled':'');
+if(grid[r][c])el.style.background=grid[r][c];
+el.setAttribute('aria-label',`Ряд ${r+1}, клетка ${c+1}`);
+el.addEventListener('click',()=>place(r,c));
+b.appendChild(el);
+}
+}
+function drawPieces(){
+const root=$('pieces');root.innerHTML='';
+choices.forEach((p,i)=>{
+const btn=document.createElement('button');
+btn.className='piece'+(selected===i?' selected':'');
+btn.disabled=p.used||over;
+const w=Math.max(...p.shape.map(q=>q[0]))+1;
+const h=Math.max(...p.shape.map(q=>q[1]))+1;
+const mini=document.createElement('div');mini.className='mini';
+mini.style.gridTemplateColumns=`repeat(${w},17px)`;
+for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+const cell=document.createElement('div');cell.className='minicell';
+if(p.shape.some(q=>q[0]===x&&q[1]===y)){
+cell.style.background=p.color;
+cell.style.boxShadow='inset 0 2px #ffffff70,inset 0 -2px #0003';
+}
+mini.appendChild(cell);
+}
+btn.appendChild(mini);
+btn.addEventListener('click',()=>{
+selected=i;drawPieces();
+$('message').textContent='Теперь коснись клетки для размещения.';
+});
+root.appendChild(btn);
+});
+}
+function can(shape,r,c){
+return shape.every(([x,y])=>r+y<N&&c+x<N&&!grid[r+y][c+x]);
+}
+function place(r,c){
+if(over)return;
+if(selected<0){$('message').textContent='Сначала выбери фигуру внизу.';return}
+const p=choices[selected];
+if(p.used)return;
+if(!can(p.shape,r,c)){
+$('message').textContent='Здесь фигура не помещается. Попробуй другое место.';
+return;
+}
+p.shape.forEach(([x,y])=>grid[r+y][c+x]=p.color);
+score+=p.shape.length;
+const rows=[],cols=[];
+for(let y=0;y<N;y++)if(grid[y].every(Boolean))rows.push(y);
+for(let x=0;x<N;x++)if(grid.every(row=>row[x]))cols.push(x);
+if(rows.length||cols.length){
+const clear=new Set();
+rows.forEach(y=>{for(let x=0;x<N;x++)clear.add(y+','+x)});
+cols.forEach(x=>{for(let y=0;y<N;y++)clear.add(y+','+x)});
+clear.forEach(k=>{const [y,x]=k.split(',').map(Number);grid[y][x]=''});
+score+=clear.size*3+((rows.length+cols.length)>1?25*rows.length*cols.length:0);
+$('message').textContent=(rows.length+cols.length>1?'🔥 СУПЕР-КОМБО! ':'💥 ЛИНИЯ ОЧИЩЕНА! ')+`+${clear.size*3} очков`;
+}else $('message').textContent='Хороший ход! Продолжай.';
+p.used=true;selected=-1;
+if(score>best){
+best=score;$('best').textContent=best;
+try{localStorage.setItem('qubiqBest',String(best))}catch(e){}
+}
+$('score').textContent=score;
+if(choices.every(q=>q.used))makeChoices();
+drawBoard();drawPieces();
+if(!choices.some(q=>!q.used&&Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>can(q.shape,r,c))).flat().some(Boolean))){
+over=true;$('message').textContent=`Игра окончена! Счёт: ${score}. Нажми «Новая игра».`;
+drawPieces();
+}
+}
+$('new').addEventListener('click',newGame);
+$('help').addEventListener('click',()=>{$('message').textContent='Выбери фигуру внизу, затем коснись поля. Заполни целый ряд или столбец, чтобы очистить линию.'});
+$('rules').addEventListener('click',()=>{$('message').textContent='Ставь фигуры на свободные клетки. Полный ряд или столбец исчезает и приносит очки.'});
+newGame();
+})();
+</script>
+</body>
+</html>
