@@ -3,168 +3,989 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#091127">
-<title>Qubiq — Blast Puzzle</title>
+<meta name="theme-color" content="#101426">
+<title>Qubiq — Block Puzzle</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2d457e,#101b3b 55%,#080e20);color:#f7f9ff;font-family:system-ui,Arial,sans-serif}
-.app{max-width:480px;margin:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
-header{display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:36px;font-weight:950;letter-spacing:-1px;background:linear-gradient(90deg,#48e7ff,#b69aff,#ff86d3);color:transparent;background-clip:text}
-.tag{font-size:10px;letter-spacing:3px;color:#aebce0}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:#1b2a50;border:1px solid #3b5087;border-radius:16px;padding:12px}
-.label{font-size:11px;color:#aebce0;letter-spacing:1px}
-.value{font-size:28px;font-weight:900}
-.boardbox{padding:8px;border-radius:20px;background:linear-gradient(135deg,#6e84f2,#27396e,#3c4e9b);box-shadow:0 12px 28px #0005}
-.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;background:#0b1430;padding:7px;border-radius:14px}
-.cell{aspect-ratio:1;border-radius:5px;background:#192647;border:1px solid #2b3a60;min-width:0;padding:0}
-.cell.filled{border-color:#ffffff66;box-shadow:inset 0 2px 2px #ffffff55,inset 0 -3px 2px #0003}
-.panel{background:#172449;border:1px solid #3b5087;border-radius:18px;padding:12px}
-.paneltitle{text-align:center;font-size:11px;letter-spacing:2px;color:#aebce0;margin-bottom:10px}
-.pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.piece{height:88px;border:1px solid #465b91;border-radius:14px;background:#22345e;display:flex;align-items:center;justify-content:center}
-.piece.selected{outline:2px solid #4de5ff}
-.piece:disabled{opacity:.25}
-.mini{display:grid;gap:3px}
-.minicell{width:17px;height:17px;border-radius:4px}
-.message{text-align:center;min-height:22px;color:#a4ffe4;font-size:12px;font-weight:700}
-.buttons{display:flex;gap:9px}
-.btn{flex:1;border:0;border-radius:14px;padding:14px 8px;font-weight:800;font-size:14px;color:white}
-.primary{background:linear-gradient(100deg,#20d6a3,#20b9d8)}
-.secondary{background:#263960;border:1px solid #43598b}
-footer{text-align:center;color:#8193bf;font-size:10px}
+:root {
+  --bg: #101426;
+  --panel: #1a2038;
+  --cell: #272e49;
+  --text: #f4f6ff;
+  --muted: #929bbd;
+  --accent: #7c6cff;
+  --gap: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, #24264a 0%, var(--bg) 58%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  display: flex;
+  justify-content: center;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  padding: 18px 15px 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.logo span {
+  color: #9a8cff;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: -3px;
+}
+
+.icon-button {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid #343b5d;
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.score-card {
+  background: linear-gradient(145deg, #202743, #191f35);
+  border: 1px solid #303754;
+  border-radius: 18px;
+  padding: 13px 16px;
+}
+
+.score-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.score-number {
+  font-size: 27px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.board-wrap {
+  width: 100%;
+  padding: 9px;
+  background: #191f35;
+  border: 1px solid #343b5a;
+  border-radius: 17px;
+  box-shadow: 0 12px 35px #0003;
+  touch-action: none;
+}
+
+.board {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: var(--gap);
+  touch-action: none;
+}
+
+.cell {
+  min-width: 0;
+  aspect-ratio: 1;
+  border-radius: 5px;
+  background: var(--cell);
+  border: 1px solid #303854;
+  transition: background 80ms;
+}
+
+.cell.filled {
+  background: var(--color, #7c6cff);
+  border-color: transparent;
+  box-shadow: inset 0 -3px 0 #0002;
+}
+
+.cell.preview {
+  background: #7c6cff;
+  border-color: #c0b8ff;
+}
+
+.cell.preview.bad {
+  background: #d94f70;
+  border-color: #ffb0c1;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-heading h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.pieces {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  min-height: 104px;
+}
+
+.piece-slot {
+  min-width: 0;
+  min-height: 100px;
+  border-radius: 16px;
+  border: 1px solid #303754;
+  background: #1a2038;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 3px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.piece-slot.selected {
+  border-color: #9d91ff;
+  background: #282747;
+  box-shadow: 0 0 0 2px #7c6cff33;
+}
+
+.piece-slot.used {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.piece-grid {
+  display: grid;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.mini-cell {
+  width: clamp(15px, 4.6vw, 21px);
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--color, #7c6cff);
+  box-shadow: inset 0 -2px 0 #0002;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.action-button {
+  border: 1px solid #3a4264;
+  background: #202743;
+  color: var(--text);
+  border-radius: 14px;
+  padding: 13px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, #8170ff, #6352e8);
+  border: none;
+}
+
+.message {
+  text-align: center;
+  min-height: 20px;
+  color: #b4bce0;
+  font-size: 13px;
+}
+
+.footer {
+  text-align: center;
+  color: #747e9f;
+  font-size: 11px;
+  padding-top: 2px;
+}
+
+/* Фигура, которую пользователь тащит пальцем */
+.drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  display: grid;
+  gap: 4px;
+  opacity: 0.95;
+  filter: drop-shadow(0 8px 12px #0006);
+  transform: translate(-50%, -50%);
+}
+
+.drag-ghost .mini-cell {
+  width: 27px;
+  border-radius: 5px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: #080b17cc;
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 340px;
+  background: #202743;
+  border: 1px solid #41496b;
+  border-radius: 22px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px #0007;
+}
+
+.dialog h2 {
+  margin: 0 0 10px;
+  font-size: 25px;
+}
+
+.dialog p {
+  color: #b8c0df;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dialog .action-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (max-height: 740px) {
+  .app {
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .logo {
+    font-size: 26px;
+  }
+
+  .score-card {
+    padding: 10px 14px;
+  }
+
+  .score-number {
+    font-size: 23px;
+  }
+
+  .pieces {
+    min-height: 86px;
+  }
+
+  .piece-slot {
+    min-height: 84px;
+  }
+}
 </style>
 </head>
+
 <body>
 <main class="app">
-<header>
-<div><div class="logo">Qubiq</div><div class="tag">BLAST PUZZLE</div></div>
-<button class="btn secondary" id="help" style="flex:0 0 auto">ⓘ</button>
-</header>
-<section class="stats">
-<div class="stat"><div class="label">✦ СЧЁТ</div><div class="value" id="score">0</div></div>
-<div class="stat"><div class="label">♛ РЕКОРД</div><div class="value" id="best">0</div></div>
-</section>
-<section><div class="boardbox"><div class="board" id="board"></div></div></section>
-<section class="panel"><div class="paneltitle">ВЫБЕРИ ФИГУРУ</div><div class="pieces" id="pieces"></div></section>
-<div class="message" id="message">Выбери фигуру, затем коснись поля.</div>
-<div class="buttons"><button class="btn primary" id="new">↻ Новая игра</button><button class="btn secondary" id="rules">Как играть</button></div>
-<footer>QUBIQ · СОБИРАЙ ЛИНИИ. НАБИРАЙ ОЧКИ.</footer>
+
+  <header>
+    <div>
+      <div class="logo">QU<span>BIQ</span></div>
+      <div class="subtitle">BLOCK PUZZLE</div>
+    </div>
+    <button class="icon-button" id="helpButton" aria-label="Правила">?</button>
+  </header>
+
+  <section class="score-row">
+    <div class="score-card">
+      <div class="score-label">ОЧКИ</div>
+      <div class="score-number" id="score">0</div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">РЕКОРД</div>
+      <div class="score-number" id="best">0</div>
+    </div>
+  </section>
+
+  <section class="board-wrap">
+    <div class="board" id="board"></div>
+  </section>
+
+  <section>
+    <div class="section-heading">
+      <h2>Твои фигуры</h2>
+      <span class="hint">Перетащи на поле 👇</span>
+    </div>
+    <div class="pieces" id="pieces"></div>
+  </section>
+
+  <div class="message" id="message">Выбери фигуру или перетащи её на поле</div>
+
+  <section class="controls">
+    <button class="action-button primary" id="newGame">↻ Новая игра</button>
+    <button class="action-button" id="clearSelection">Снять выбор</button>
+  </section>
+
+  <div class="footer">QUBIQ · Играй в своём ритме</div>
+
 </main>
+
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <h2 id="dialogTitle">Как играть?</h2>
+    <p id="dialogText">
+      Перетащи фигуру пальцем на поле или сначала выбери её, а затем нажми на клетку.
+      Заполняй целые горизонтальные и вертикальные линии, чтобы очистить их и получить очки.
+    </p>
+    <button class="action-button primary" id="closeDialog">Понятно!</button>
+  </div>
+</div>
+
 <script>
-(()=>{
-const N=8;
-const colors=['#42d9ff','#a58aff','#ff70ba','#ffc34f','#52e6a1','#508bff','#ff876e'];
-const shapes=[
-[[0,0]],[[0,0],[1,0]],[[0,0],[0,1]],
-[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],
-[[0,0],[1,0],[0,1],[1,1]],
-[[0,0],[1,0],[2,0],[1,1]],
-[[0,0],[1,0],[2,0],[3,0]],
-[[0,0],[0,1],[0,2],[0,3]],
-[[0,0],[1,0],[2,0],[0,1],[1,1]],
-[[0,0],[0,1],[1,1],[1,2]]
-];
-const $=id=>document.getElementById(id);
-let grid=[],score=0,best=0,choices=[],selected=-1,over=false;
-try{best=Number(localStorage.getItem('qubiqBest'))||0}catch(e){}
-$('best').textContent=best;
-function newGame(){
-grid=Array.from({length:N},()=>Array(N).fill(''));
-score=0;selected=-1;over=false;
-$('score').textContent='0';
-$('message').textContent='Выбери фигуру, затем коснись поля.';
-makeChoices();drawBoard();drawPieces();
-}
-function makeChoices(){
-choices=Array.from({length:3},()=>({
-shape:shapes[Math.floor(Math.random()*shapes.length)],
-color:colors[Math.floor(Math.random()*colors.length)],
-used:false
-}));
-selected=-1;
-}
-function drawBoard(){
-const b=$('board');b.innerHTML='';
-for(let r=0;r<N;r++)for(let c=0;c<N;c++){
-const el=document.createElement('button');
-el.type='button';el.className='cell'+(grid[r][c]?' filled':'');
-if(grid[r][c])el.style.background=grid[r][c];
-el.setAttribute('aria-label',`Ряд ${r+1}, клетка ${c+1}`);
-el.addEventListener('click',()=>place(r,c));
-b.appendChild(el);
-}
-}
-function drawPieces(){
-const root=$('pieces');root.innerHTML='';
-choices.forEach((p,i)=>{
-const btn=document.createElement('button');
-btn.className='piece'+(selected===i?' selected':'');
-btn.disabled=p.used||over;
-const w=Math.max(...p.shape.map(q=>q[0]))+1;
-const h=Math.max(...p.shape.map(q=>q[1]))+1;
-const mini=document.createElement('div');mini.className='mini';
-mini.style.gridTemplateColumns=`repeat(${w},17px)`;
-for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-const cell=document.createElement('div');cell.className='minicell';
-if(p.shape.some(q=>q[0]===x&&q[1]===y)){
-cell.style.background=p.color;
-cell.style.boxShadow='inset 0 2px #ffffff70,inset 0 -2px #0003';
-}
-mini.appendChild(cell);
-}
-btn.appendChild(mini);
-btn.addEventListener('click',()=>{
-selected=i;drawPieces();
-$('message').textContent='Теперь коснись клетки для размещения.';
-});
-root.appendChild(btn);
-});
-}
-function can(shape,r,c){
-return shape.every(([x,y])=>r+y<N&&c+x<N&&!grid[r+y][c+x]);
-}
-function place(r,c){
-if(over)return;
-if(selected<0){$('message').textContent='Сначала выбери фигуру внизу.';return}
-const p=choices[selected];
-if(p.used)return;
-if(!can(p.shape,r,c)){
-$('message').textContent='Здесь фигура не помещается. Попробуй другое место.';
-return;
-}
-p.shape.forEach(([x,y])=>grid[r+y][c+x]=p.color);
-score+=p.shape.length;
-const rows=[],cols=[];
-for(let y=0;y<N;y++)if(grid[y].every(Boolean))rows.push(y);
-for(let x=0;x<N;x++)if(grid.every(row=>row[x]))cols.push(x);
-if(rows.length||cols.length){
-const clear=new Set();
-rows.forEach(y=>{for(let x=0;x<N;x++)clear.add(y+','+x)});
-cols.forEach(x=>{for(let y=0;y<N;y++)clear.add(y+','+x)});
-clear.forEach(k=>{const [y,x]=k.split(',').map(Number);grid[y][x]=''});
-score+=clear.size*3+((rows.length+cols.length)>1?25*rows.length*cols.length:0);
-$('message').textContent=(rows.length+cols.length>1?'🔥 СУПЕР-КОМБО! ':'💥 ЛИНИЯ ОЧИЩЕНА! ')+`+${clear.size*3} очков`;
-}else $('message').textContent='Хороший ход! Продолжай.';
-p.used=true;selected=-1;
-if(score>best){
-best=score;$('best').textContent=best;
-try{localStorage.setItem('qubiqBest',String(best))}catch(e){}
-}
-$('score').textContent=score;
-if(choices.every(q=>q.used))makeChoices();
-drawBoard();drawPieces();
-if(!choices.some(q=>!q.used&&Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>can(q.shape,r,c))).flat().some(Boolean))){
-over=true;$('message').textContent=`Игра окончена! Счёт: ${score}. Нажми «Новая игра».`;
-drawPieces();
-}
-}
-$('new').addEventListener('click',newGame);
-$('help').addEventListener('click',()=>{$('message').textContent='Выбери фигуру внизу, затем коснись поля. Заполни целый ряд или столбец, чтобы очистить линию.'});
-$('rules').addEventListener('click',()=>{$('message').textContent='Ставь фигуры на свободные клетки. Полный ряд или столбец исчезает и приносит очки.'});
-newGame();
+(() => {
+  "use strict";
+
+  const SIZE = 8;
+
+  const COLORS = [
+    "#7c6cff",
+    "#32c7b5",
+    "#ffb84d",
+    "#ff6e91",
+    "#54a5ff",
+    "#b67cff"
+  ];
+
+  const SHAPES = [
+    [[0,0]],
+    [[0,0],[0,1]],
+    [[0,0],[1,0]],
+    [[0,0],[0,1],[0,2]],
+    [[0,0],[1,0],[2,0]],
+    [[0,0],[0,1],[0,2],[0,3]],
+    [[0,0],[1,0],[2,0],[3,0]],
+    [[0,0],[0,1],[1,0],[1,1]],
+    [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],
+    [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]],
+    [[0,0],[1,0],[2,0],[2,1]],
+    [[0,0],[0,1],[0,2],[1,2]],
+    [[0,0],[1,0],[1,1]],
+    [[0,0],[0,1],[1,1]],
+    [[0,1],[1,0],[1,1],[1,2]],
+    [[0,0],[0,1],[1,1],[1,2]],
+    [[0,1],[1,0],[1,1],[2,0]],
+    [[0,0],[1,0],[1,1],[2,1]]
+  ];
+
+  const boardElement = document.getElementById("board");
+  const piecesElement = document.getElementById("pieces");
+  const scoreElement = document.getElementById("score");
+  const bestElement = document.getElementById("best");
+  const messageElement = document.getElementById("message");
+  const overlay = document.getElementById("overlay");
+  const dialogTitle = document.getElementById("dialogTitle");
+  const dialogText = document.getElementById("dialogText");
+
+  let grid = [];
+  let score = 0;
+  let best = 0;
+  let pieces = [];
+  let selectedPiece = -1;
+  let drag = null;
+  let previewCells = [];
+
+  try {
+    best = Number(localStorage.getItem("qubiqBest")) || 0;
+  } catch (e) {
+    best = 0;
+  }
+
+  function setMessage(text) {
+    messageElement.textContent = text;
+  }
+
+  function updateScore() {
+    scoreElement.textContent = score;
+    bestElement.textContent = best;
+  }
+
+  function newEmptyGrid() {
+    return Array.from({ length: SIZE }, () =>
+      Array(SIZE).fill(null)
+    );
+  }
+
+  function randomPiece() {
+    const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    return {
+      shape: shape.map(cell => [...cell]),
+      color,
+      used: false
+    };
+  }
+
+  function getShapeSize(shape) {
+    const maxRow = Math.max(...shape.map(cell => cell[0]));
+    const maxCol = Math.max(...shape.map(cell => cell[1]));
+
+    return {
+      rows: maxRow + 1,
+      cols: maxCol + 1
+    };
+  }
+
+  function renderBoard() {
+    boardElement.innerHTML = "";
+
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+
+        if (grid[row][col]) {
+          cell.classList.add("filled");
+          cell.style.setProperty("--color", grid[row][col]);
+        }
+
+        boardElement.appendChild(cell);
+      }
+    }
+
+    renderPreview();
+  }
+
+  function makePieceGrid(shape, color, className) {
+    const size = getShapeSize(shape);
+    const element = document.createElement("div");
+
+    element.className = className;
+    element.style.gridTemplateColumns = `repeat(${size.cols}, auto)`;
+    element.style.gridTemplateRows = `repeat(${size.rows}, auto)`;
+    element.style.setProperty("--color", color);
+
+    const occupied = new Set(
+      shape.map(([r, c]) => `${r},${c}`)
+    );
+
+    for (let r = 0; r < size.rows; r++) {
+      for (let c = 0; c < size.cols; c++) {
+        const block = document.createElement("div");
+
+        if (occupied.has(`${r},${c}`)) {
+          block.className = "mini-cell";
+          block.style.setProperty("--color", color);
+        } else {
+          block.style.width = "clamp(15px, 4.6vw, 21px)";
+          block.style.aspectRatio = "1";
+          block.style.visibility = "hidden";
+        }
+
+        element.appendChild(block);
+      }
+    }
+
+    return element;
+  }
+
+  function renderPieces() {
+    piecesElement.innerHTML = "";
+
+    pieces.forEach((piece, index) => {
+      const slot = document.createElement("div");
+      slot.className = "piece-slot";
+
+      if (piece.used) {
+        slot.classList.add("used");
+      }
+
+      if (selectedPiece === index && !piece.used) {
+        slot.classList.add("selected");
+      }
+
+      if (!piece.used) {
+        slot.appendChild(
+          makePieceGrid(piece.shape, piece.color, "piece-grid")
+        );
+
+        slot.addEventListener("pointerdown", event => {
+          if (event.button !== undefined && event.button !== 0) return;
+
+          event.preventDefault();
+
+          selectedPiece = index;
+          beginDrag(index, event);
+          renderPieces();
+        });
+
+        slot.addEventListener("click", event => {
+          if (drag && drag.moved) return;
+
+          if (!piece.used) {
+            selectedPiece = index;
+            renderPieces();
+            setMessage("Фигура выбрана. Нажми на поле или перетащи её.");
+          }
+        });
+      }
+
+      piecesElement.appendChild(slot);
+    });
+  }
+
+  function canPlace(shape, row, col) {
+    for (const [dr, dc] of shape) {
+      const r = row + dr;
+      const c = col + dc;
+
+      if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) {
+        return false;
+      }
+
+      if (grid[r][c] !== null) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function clearPreview() {
+    previewCells.forEach(cell => {
+      cell.classList.remove("preview", "bad");
+    });
+
+    previewCells = [];
+  }
+
+  function renderPreview() {
+    clearPreview();
+
+    if (!drag || !drag.target) return;
+
+    const { row, col } = drag.target;
+    const valid = canPlace(drag.shape, row, col);
+
+    drag.shape.forEach(([dr, dc]) => {
+      const r = row + dr;
+      const c = col + dc;
+
+      if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return;
+
+      const cell = boardElement.querySelector(
+        `[data-row="${r}"][data-col="${c}"]`
+      );
+
+      if (cell) {
+        cell.classList.add(valid ? "preview" : "preview", "bad");
+        if (valid) cell.classList.remove("bad");
+        previewCells.push(cell);
+      }
+    });
+  }
+
+  function getBoardCellAt(x, y) {
+    const rect = boardElement.getBoundingClientRect();
+
+    if (
+      x < rect.left ||
+      x > rect.right ||
+      y < rect.top ||
+      y > rect.bottom
+    ) {
+      return null;
+    }
+
+    const styles = getComputedStyle(boardElement);
+    const gap = parseFloat(styles.gap) || 4;
+    const cellSize = (rect.width - gap * (SIZE - 1)) / SIZE;
+
+    const col = Math.floor((x - rect.left) / (cellSize + gap));
+    const row = Math.floor((y - rect.top) / (cellSize + gap));
+
+    if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
+      return null;
+    }
+
+    return { row, col };
+  }
+
+  function beginDrag(index, event) {
+    const piece = pieces[index];
+
+    if (!piece || piece.used) return;
+
+    drag = {
+      index,
+      shape: piece.shape,
+      color: piece.color,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false,
+      target: null,
+      ghost: null
+    };
+
+    document.addEventListener("pointermove", onPointerMove, {
+      passive: false
+    });
+
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerCancel);
+
+    setMessage("Перетащи фигуру на свободные клетки поля.");
+  }
+
+  function makeGhost() {
+    if (!drag) return;
+
+    const size = getShapeSize(drag.shape);
+    const ghost = document.createElement("div");
+
+    ghost.className = "drag-ghost";
+    ghost.style.gridTemplateColumns = `repeat(${size.cols}, 27px)`;
+    ghost.style.gridTemplateRows = `repeat(${size.rows}, 27px)`;
+    ghost.style.setProperty("--color", drag.color);
+
+    const occupied = new Set(
+      drag.shape.map(([r, c]) => `${r},${c}`)
+    );
+
+    for (let r = 0; r < size.rows; r++) {
+      for (let c = 0; c < size.cols; c++) {
+        const block = document.createElement("div");
+
+        if (occupied.has(`${r},${c}`)) {
+          block.className = "mini-cell";
+          block.style.setProperty("--color", drag.color);
+        } else {
+          block.style.width = "27px";
+          block.style.aspectRatio = "1";
+          block.style.visibility = "hidden";
+        }
+
+        ghost.appendChild(block);
+      }
+    }
+
+    document.body.appendChild(ghost);
+    drag.ghost = ghost;
+  }
+
+  function onPointerMove(event) {
+    if (!drag) return;
+
+    event.preventDefault();
+
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+
+    if (!drag.moved && Math.hypot(dx, dy) > 7) {
+      drag.moved = true;
+      makeGhost();
+    }
+
+    if (!drag.moved) return;
+
+    if (drag.ghost) {
+      drag.ghost.style.left = event.clientX + "px";
+      drag.ghost.style.top = (event.clientY - 55) + "px";
+    }
+
+    const cell = getBoardCellAt(event.clientX, event.clientY);
+
+    if (cell) {
+      drag.target = {
+        row: cell.row,
+        col: cell.col
+      };
+    } else {
+      drag.target = null;
+    }
+
+    renderPreview();
+  }
+
+  function onPointerUp(event) {
+    if (!drag) return;
+
+    const currentDrag = drag;
+
+    document.removeEventListener("pointermove", onPointerMove);
+    document.removeEventListener("pointerup", onPointerUp);
+    document.removeEventListener("pointercancel", onPointerCancel);
+
+    if (currentDrag.ghost) {
+      currentDrag.ghost.remove();
+    }
+
+    clearPreview();
+
+    if (currentDrag.moved) {
+      const cell = getBoardCellAt(event.clientX, event.clientY);
+
+      if (cell && canPlace(currentDrag.shape, cell.row, cell.col)) {
+        placePiece(
+          currentDrag.index,
+          cell.row,
+          cell.col
+        );
+      } else {
+        setMessage("Сюда поставить нельзя. Попробуй другое место.");
+      }
+    } else {
+      selectedPiece = currentDrag.index;
+      setMessage("Фигура выбрана. Нажми на свободное место.");
+      renderPieces();
+    }
+
+    drag = null;
+    renderPreview();
+  }
+
+  function onPointerCancel() {
+    if (!drag) return;
+
+    if (drag.ghost) drag.ghost.remove();
+
+    document.removeEventListener("pointermove", onPointerMove);
+    document.removeEventListener("pointerup", onPointerUp);
+    document.removeEventListener("pointercancel", onPointerCancel);
+
+    drag = null;
+    clearPreview();
+    renderPieces();
+  }
+
+  function placePiece(index, row, col) {
+    const piece = pieces[index];
+
+    if (!piece || piece.used) return;
+
+    if (!canPlace(piece.shape, row, col)) {
+      setMessage("Эта фигура не помещается сюда.");
+      return;
+    }
+
+    for (const [dr, dc] of piece.shape) {
+      grid[row + dr][col + dc] = piece.color;
+    }
+
+    piece.used = true;
+    selectedPiece = -1;
+
+    score += piece.shape.length;
+
+    const fullRows = [];
+    const fullCols = [];
+
+    for (let r = 0; r < SIZE; r++) {
+      if (grid[r].every(value => value !== null)) {
+        fullRows.push(r);
+      }
+    }
+
+    for (let c = 0; c < SIZE; c++) {
+      let full = true;
+
+      for (let r = 0; r < SIZE; r++) {
+        if (grid[r][c] === null) {
+          full = false;
+          break;
+        }
+      }
+
+      if (full) fullCols.push(c);
+    }
+
+    const clearedCount = fullRows.length + fullCols.length;
+
+    if (clearedCount > 0) {
+      fullRows.forEach(r => {
+        for (let c = 0; c < SIZE; c++) {
+          grid[r][c] = null;
+        }
+      });
+
+      fullCols.forEach(c => {
+        for (let r = 0; r < SIZE; r++) {
+          grid[r][c] = null;
+        }
+      });
+
+      score += clearedCount * 10 + Math.max(0, clearedCount - 1) * 5;
+      setMessage(`Отлично! Очищено линий: ${clearedCount} 🎉`);
+    } else {
+      setMessage("Хороший ход! Продолжай.");
+    }
+
+    if (score > best) {
+      best = score;
+
+      try {
+        localStorage.setItem("qubiqBest", String(best));
+      } catch (e) {
+        // Игра продолжает работать, даже если сохранение недоступно.
+      }
+    }
+
+    if (pieces.every(p => p.used)) {
+      pieces = [
+        randomPiece(),
+        randomPiece(),
+        randomPiece()
+      ];
+    }
+
+    updateScore();
+    renderBoard();
+    renderPieces();
+
+    if (!hasAnyMove()) {
+      showGameOver();
+    }
+  }
+
+  function hasAnyMove() {
+    for (const piece of pieces) {
+      if (piece.used) continue;
+
+      for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+          if (canPlace(piece.shape, row, col)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  function showGameOver() {
+    dialogTitle.textContent = "Игра окончена!";
+    dialogText.textContent =
+      `Твои очки: ${score}. Новая игра — новый шанс побить рекорд!`;
+
+    overlay.classList.add("show");
+  }
+
+  function startNewGame() {
+    grid = newEmptyGrid();
+    score = 0;
+    selectedPiece = -1;
+    drag = null;
+
+    pieces = [
+      randomPiece(),
+      randomPiece(),
+      randomPiece()
+    ];
+
+    updateScore();
+    renderBoard();
+    renderPieces();
+
+    overlay.classList.remove("show");
+    setMessage("Выбери фигуру или перетащи её на поле.");
+  }
+
+  boardElement.addEventListener("click", event => {
+    if (drag) return;
+
+    const cell = event.target.closest(".cell");
+    if (!cell) return;
+
+    const row = Number(cell.dataset.row);
+    const col = Number(cell.dataset.col);
+
+    if (selectedPiece < 0) {
+      setMessage("Сначала выбери фигуру внизу.");
+      return;
+    }
+
+    placePiece(selectedPiece, row, col);
+  });
+
+  document.getElementById("newGame").addEventListener("click", () => {
+    startNewGame();
+  });
+
+  document.getElementById("clearSelection").addEventListener("click", () => {
+    selectedPiece = -1;
+    renderPieces();
+    clearPreview();
+    setMessage("Выбор снят. Выбери другую фигуру.");
+  });
+
+  document.getElementById("helpButton").addEventListener("click", () => {
+    dialogTitle.textContent = "Как играть?";
+    dialogText.textContent =
+      "Перетаскивай фигуры пальцем на поле. Можно также нажать на фигуру, а затем на клетку. Заполняй целые горизонтальные и вертикальные линии, чтобы очистить их и получить очки. Фигуры нельзя накладывать друг на друга.";
+    overlay.classList.add("show");
+  });
+
+  document.getElementById("closeDialog").addEventListener("click", () => {
+    overlay.classList.remove("show");
+  });
+
+  startNewGame();
 })();
 </script>
+
 </body>
 </html>
