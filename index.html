@@ -1,92 +1,170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#090f25"><title>Qubiq — Blast Puzzle</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#091127">
+<title>Qubiq — Blast Puzzle</title>
 <style>
-:root{--bg:#090f25;--panel:#151f3f;--muted:#aab9df;--white:#f8fbff}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100dvh;color:var(--white);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(ellipse at 50% -15%,#354d91 0,#18264e 34%,#090f25 72%);display:flex;justify-content:center;overflow-x:hidden;touch-action:manipulation}
-.app{width:min(100%,500px);padding:13px 15px 22px;display:flex;flex-direction:column;gap:12px;position:relative}
-header{display:flex;align-items:center;justify-content:space-between;padding:2px 4px}
-.brand{font-weight:1000;font-size:32px;letter-spacing:-1.8px;background:linear-gradient(110deg,#4ceaff,#a0a5ff 48%,#ff86d5);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 10px #58dfff45)}
-.tag{font-size:10px;color:#aab9df;letter-spacing:3px;text-transform:uppercase;margin-top:-4px}
-.round{height:43px;width:43px;border-radius:15px;color:white;border:1px solid #5267a0;background:linear-gradient(145deg,#293b6d,#172345);font-size:19px;box-shadow:0 5px 12px #0003}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2d457e,#101b3b 55%,#080e20);color:#f7f9ff;font-family:system-ui,Arial,sans-serif}
+.app{max-width:480px;margin:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:36px;font-weight:950;letter-spacing:-1px;background:linear-gradient(90deg,#48e7ff,#b69aff,#ff86d3);color:transparent;background-clip:text}
+.tag{font-size:10px;letter-spacing:3px;color:#aebce0}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{padding:10px 15px;border:1px solid #43588e;border-radius:17px;background:linear-gradient(145deg,#263965d9,#131e3c);box-shadow:inset 0 1px #ffffff12,0 8px 18px #0002}
-.label{font-size:10px;letter-spacing:1.5px;color:#a8b8e4;font-weight:800}.val{font-size:27px;font-weight:950;line-height:1.15;text-shadow:0 2px 12px #6e8dff55}
-.board-shell{position:relative;padding:9px;border-radius:23px;background:linear-gradient(135deg,#637ce8,#303e81 25%,#1b2a55 60%,#5d73cf);box-shadow:0 12px 30px #0005,0 0 24px #547dff25}
-.board-inner{padding:7px;border-radius:16px;background:linear-gradient(145deg,#111b39,#0a122b);border:1px solid #8199ed50;position:relative}
-#board{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;aspect-ratio:1;position:relative}
-.cell{position:relative;min-width:0;aspect-ratio:1;border-radius:6px;background:linear-gradient(145deg,#1b294c,#111b36);border:1px solid #31416b;overflow:hidden;transition:transform .12s,filter .12s}
-.cell.filled{border:1px solid #ffffff55;box-shadow:inset 0 2px 1px #ffffff70,inset 0 -3px 2px #0002,0 2px 4px #0005}
-.cell.filled:before{content:"";position:absolute;left:12%;top:8%;width:66%;height:25%;border-radius:50%;background:#fff5;filter:blur(2px);transform:rotate(-15deg)}
-.cell.filled:after{content:"";position:absolute;inset:0;background:linear-gradient(130deg,#ffffff17,transparent 42%,#00000010);border-radius:inherit}
-.cell.preview{filter:brightness(1.35);outline:2px solid #fff;z-index:2}
-.board-hint{text-align:center;font-size:11px;color:#aab9df;margin:8px 0 1px}
-.piece-panel{padding:12px 10px 10px;border-radius:20px;background:linear-gradient(145deg,#1d2b52,#111a36);border:1px solid #3d5181;box-shadow:0 8px 20px #0003}
-.piece-title{text-align:center;font-size:10px;letter-spacing:2px;color:#aab9df;font-weight:850;margin-bottom:9px}
-.piece-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.piece{height:82px;cursor:grab;user-select:none;-webkit-user-select:none;display:flex;align-items:center;justify-content:center;border:1px solid #41578c;border-radius:15px;background:linear-gradient(145deg,#2a3e70,#1a294e);touch-action:none;position:relative;box-shadow:inset 0 1px #ffffff0c,0 4px 10px #0002}
-.piece.selected{border:2px solid #60e9ff;box-shadow:0 0 0 3px #60e9ff20,0 0 18px #60dfff35}
-.mini{display:grid;gap:3px}.mini-cell{width:18px;height:18px;border-radius:5px;background:transparent}.mini-cell.on{border:1px solid #ffffff5c;box-shadow:inset 0 2px #ffffff70,inset 0 -3px #0002,0 2px 4px #0004}
-.message{height:20px;text-align:center;color:#9bf7df;font-weight:750;font-size:12px;text-shadow:0 0 10px #36ffd055}
-.actions{display:flex;gap:9px}.btn{border:0;border-radius:15px;padding:13px 12px;color:white;font-weight:850;font-size:14px;flex:1}
-.primary{background:linear-gradient(100deg,#20d9a1,#25bcd9);box-shadow:0 5px 18px #1ed9bb3a,inset 0 1px #ffffff70}.secondary{background:linear-gradient(145deg,#2b3d6c,#1c2a4f);border:1px solid #405584}
-#dragGhost{position:fixed;z-index:8;pointer-events:none;display:none;filter:drop-shadow(0 8px 12px #0007);transform:translate(-50%,-115%);gap:4px}.ghost-cell{width:28px;height:28px;border-radius:6px;border:1px solid #ffffff80;box-shadow:inset 0 2px 2px #ffffff75,inset 0 -3px 2px #0002,0 2px 4px #0005}\n#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
-.float{position:fixed;z-index:6;pointer-events:none;font-size:26px;font-weight:1000;color:#fff;text-shadow:0 0 7px #fff,0 0 18px #ffcd4d,0 3px 4px #0008;animation:floatup .85s ease-out forwards}
-@keyframes floatup{0%{transform:translate(-50%,0) scale(.35) rotate(-8deg);opacity:0}25%{transform:translate(-50%,-12px) scale(1.25) rotate(4deg);opacity:1}100%{transform:translate(-50%,-80px) scale(.9);opacity:0}}
-.shake{animation:shake .28s ease-out}@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}45%{transform:translateX(4px)}70%{transform:translateX(-2px}}
-.overlay{position:fixed;inset:0;z-index:10;background:#05091bdc;display:none;align-items:center;justify-content:center;padding:22px}
-.modal{width:min(100%,350px);text-align:center;padding:27px 22px;border-radius:26px;border:1px solid #647ee3;background:linear-gradient(145deg,#253966,#111a38);box-shadow:0 25px 70px #0009}
-.modal h2{font-size:29px;margin:0 0 8px}.modal p{color:#b9c6e8;line-height:1.5}.modal .btn{width:100%;margin-top:9px}
-footer{text-align:center;font-size:10px;color:#7487b5}
-@media(max-height:760px){.app{gap:8px;padding-top:8px}.brand{font-size:27px}.stat{padding:7px 12px}.val{font-size:23px}.piece{height:69px}.mini-cell{width:16px;height:16px}}
-</style></head><body>
-<canvas id="fx"></canvas>
-<main class="app" id="app">
-<header><div><div class="brand">Qubiq</div><div class="tag">BLAST PUZZLE</div></div><button class="round" id="sound" aria-label="Звук">♫</button></header>
-<section class="stats"><div class="stat"><div class="label">✦ СЧЁТ</div><div class="val" id="score">0</div></div><div class="stat"><div class="label">♛ ЛУЧШИЙ</div><div class="val" id="best">0</div></div></section>
-<section class="board-shell"><div class="board-inner"><div id="board"></div></div><div class="board-hint">ВЫБЕРИ ФИГУРУ · КОСНИСЬ ПОЛЯ</div></section>
-<section class="piece-panel"><div class="piece-title">ТВОИ ФИГУРЫ</div><div class="piece-row" id="pieces"></div></section>
-<div class="message" id="message">Собирай линии и запускай комбо!</div>
-<div class="actions"><button class="btn primary" id="new">↻ Новая игра</button><button class="btn secondary" id="help">ⓘ Как играть</button></div>
-<footer>QUbiq · СТРОЙ КОМБО. ВЗРЫВАЙ ЛИНИИ.</footer>
+.stat{background:#1b2a50;border:1px solid #3b5087;border-radius:16px;padding:12px}
+.label{font-size:11px;color:#aebce0;letter-spacing:1px}
+.value{font-size:28px;font-weight:900}
+.boardbox{padding:8px;border-radius:20px;background:linear-gradient(135deg,#6e84f2,#27396e,#3c4e9b);box-shadow:0 12px 28px #0005}
+.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;background:#0b1430;padding:7px;border-radius:14px}
+.cell{aspect-ratio:1;border-radius:5px;background:#192647;border:1px solid #2b3a60;min-width:0;padding:0}
+.cell.filled{border-color:#ffffff66;box-shadow:inset 0 2px 2px #ffffff55,inset 0 -3px 2px #0003}
+.panel{background:#172449;border:1px solid #3b5087;border-radius:18px;padding:12px}
+.paneltitle{text-align:center;font-size:11px;letter-spacing:2px;color:#aebce0;margin-bottom:10px}
+.pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.piece{height:88px;border:1px solid #465b91;border-radius:14px;background:#22345e;display:flex;align-items:center;justify-content:center}
+.piece.selected{outline:2px solid #4de5ff}
+.piece:disabled{opacity:.25}
+.mini{display:grid;gap:3px}
+.minicell{width:17px;height:17px;border-radius:4px}
+.message{text-align:center;min-height:22px;color:#a4ffe4;font-size:12px;font-weight:700}
+.buttons{display:flex;gap:9px}
+.btn{flex:1;border:0;border-radius:14px;padding:14px 8px;font-weight:800;font-size:14px;color:white}
+.primary{background:linear-gradient(100deg,#20d6a3,#20b9d8)}
+.secondary{background:#263960;border:1px solid #43598b}
+footer{text-align:center;color:#8193bf;font-size:10px}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+<div><div class="logo">Qubiq</div><div class="tag">BLAST PUZZLE</div></div>
+<button class="btn secondary" id="help" style="flex:0 0 auto">ⓘ</button>
+</header>
+<section class="stats">
+<div class="stat"><div class="label">✦ СЧЁТ</div><div class="value" id="score">0</div></div>
+<div class="stat"><div class="label">♛ РЕКОРД</div><div class="value" id="best">0</div></div>
+</section>
+<section><div class="boardbox"><div class="board" id="board"></div></div></section>
+<section class="panel"><div class="paneltitle">ВЫБЕРИ ФИГУРУ</div><div class="pieces" id="pieces"></div></section>
+<div class="message" id="message">Выбери фигуру, затем коснись поля.</div>
+<div class="buttons"><button class="btn primary" id="new">↻ Новая игра</button><button class="btn secondary" id="rules">Как играть</button></div>
+<footer>QUBIQ · СОБИРАЙ ЛИНИИ. НАБИРАЙ ОЧКИ.</footer>
 </main>
-<div class="overlay" id="overlay"><div class="modal"><h2 id="modalTitle">Игра окончена</h2><p id="modalText"></p><button class="btn primary" id="again">Играть снова</button></div></div>
 <script>
-const N=8, colors=['#42d9ff','#a58aff','#ff70ba','#ffc34f','#52e6a1','#508bff','#ff876e'];
-const shapes=[[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],[[0,0],[1,0],[0,1],[1,1]],[[0,0],[1,0],[2,0],[1,1]],[[0,0],[0,1],[1,1],[1,2]],[[0,0],[1,0],[2,0],[0,1]],[[0,0],[1,0],[2,0],[0,1],[1,1]],[[0,0],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[0,1],[0,2]],[[0,0],[1,0],[1,1],[2,1]],[[0,0]],[[0,0],[1,0]],[[0,0],[0,1],[0,2],[1,2]],[[0,0],[1,0],[2,0],[2,1],[2,2]],[[0,0],[1,0],[1,1],[1,2]],[[0,0],[1,0],[2,0],[1,1],[1,2]]];
-let grid,score,best=+(localStorage.getItem('qubiqBest')||0),choices=[],selected=-1,over=false,sound=true,combo=0;
-const $=id=>document.getElementById(id), board=$('board'), pieces=$('pieces'), fx=$('fx'),ctx=fx.getContext('2d');
+(()=>{
+const N=8;
+const colors=['#42d9ff','#a58aff','#ff70ba','#ffc34f','#52e6a1','#508bff','#ff876e'];
+const shapes=[
+[[0,0]],[[0,0],[1,0]],[[0,0],[0,1]],
+[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],
+[[0,0],[1,0],[0,1],[1,1]],
+[[0,0],[1,0],[2,0],[1,1]],
+[[0,0],[1,0],[2,0],[3,0]],
+[[0,0],[0,1],[0,2],[0,3]],
+[[0,0],[1,0],[2,0],[0,1],[1,1]],
+[[0,0],[0,1],[1,1],[1,2]]
+];
+const $=id=>document.getElementById(id);
+let grid=[],score=0,best=0,choices=[],selected=-1,over=false;
+try{best=Number(localStorage.getItem('qubiqBest'))||0}catch(e){}
 $('best').textContent=best;
-function resizeFx(){fx.width=innerWidth*devicePixelRatio;fx.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}addEventListener('resize',resizeFx);resizeFx();
-function newGame(){grid=Array.from({length:N},()=>Array(N).fill(null));score=0;selected=-1;over=false;combo=0;$('overlay').style.display='none';$('score').textContent=0;$('message').textContent='Собирай линии и запускай комбо!';makeChoices();render();renderPieces()}
-function makeChoices(){choices=Array.from({length:3},()=>({shape:shapes[Math.random()*shapes.length|0].map(p=>[...p]),color:colors[Math.random()*colors.length|0],used:false}));selected=-1}
-function render(preview=null){board.innerHTML='';for(let r=0;r<N;r++)for(let c=0;c<N;c++){let e=document.createElement('div');e.className='cell';if(grid[r][c]){e.classList.add('filled');e.style.background=`linear-gradient(145deg,${grid[r][c]},${grid[r][c]}b8)`}if(preview&&preview.cells.some(([rr,cc])=>rr===r&&cc===c)){e.classList.add('preview');e.style.background=preview.valid?'#ffffff7a':'#ff507a99'}e.addEventListener('click',()=>place(r,c));board.appendChild(e)}}
-let dragging=null;
-function cellAt(x,y){let els=[...board.children];for(let i=0;i<els.length;i++){let r=els[i].getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return {r:Math.floor(i/N),c:i%N}}return null}
-function showPreviewAt(x,y,p){let hit=cellAt(x,y);if(!hit){render();return}let valid=can(p.shape,hit.r,hit.c),cells=p.shape.map(([dx,dy])=>[hit.r+dy,hit.c+dx]).filter(([r,c])=>r>=0&&r<N&&c>=0&&c<N);render({cells,valid})}
-function renderPieces(){pieces.innerHTML='';choices.forEach((p,i)=>{let b=document.createElement('button');b.className='piece'+(selected===i?' selected':'');b.style.opacity=p.used?'.22':'1';b.disabled=p.used||over;let w=Math.max(...p.shape.map(q=>q[0]))+1,h=Math.max(...p.shape.map(q=>q[1]))+1,m=document.createElement('div');m.className='mini';m.style.gridTemplateColumns=`repeat(${w},18px)`;m.style.gridTemplateRows=`repeat(${h},18px)`;for(let y=0;y<h;y++)for(let x=0;x<w;x++){let z=document.createElement('div');z.className='mini-cell';if(p.shape.some(([xx,yy])=>xx===x&&yy===y)){z.classList.add('on');z.style.background=`linear-gradient(145deg,#fff5,transparent 40%),${p.color}`}m.appendChild(z)}b.append(m);
-b.addEventListener('pointerdown',ev=>{if(p.used||over)return;ev.preventDefault();selected=i;dragging={index:i,pointerId:ev.pointerId};b.classList.add('selected');buildGhost(p,ev.clientX,ev.clientY);b.setPointerCapture?.(ev.pointerId);$('message').textContent='Перетащи фигуру на поле';});
-b.addEventListener('pointermove',ev=>{if(!dragging||dragging.index!==i)return;ev.preventDefault();moveGhost(ev.clientX,ev.clientY);showPreviewAt(ev.clientX,ev.clientY-55,p)});
-b.addEventListener('pointerup',ev=>{if(!dragging||dragging.index!==i)return;ev.preventDefault();let hit=cellAt(ev.clientX,ev.clientY-55);dragging=null;ghost.style.display='none';if(hit)place(hit.r,hit.c);else{selected=-1;renderPieces();render();}});
-b.addEventListener('pointercancel',()=>{dragging=null;ghost.style.display='none';render();});b.onclick=()=>{if(p.used||dragging)return;selected=i;renderPieces();$('message').textContent='Выбрано! Перетащи фигуру на поле или нажми на клетку';};pieces.append(b)})}
-function can(s,r,c){return s.every(([x,y])=>r+y<N&&c+x<N&&!grid[r+y][c+x])}
-function burst(x,y,color,count=12){for(let i=0;i<count;i++){let a=Math.random()*Math.PI*2,v=1+Math.random()*5,life=25+Math.random()*25;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.4,life,max:life,color,size:2+Math.random()*4})}}
-let particles=[], raf=false;
-function animate(){if(!particles.length){raf=false;ctx.clearRect(0,0,innerWidth,innerHeight);return}raf=true;ctx.clearRect(0,0,innerWidth,innerHeight);particles=particles.filter(p=>p.life>0);for(let p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.13;p.vx*=.985;p.life--;ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.shadowBlur=10;ctx.shadowColor=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*(p.life/p.max+.2),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;ctx.shadowBlur=0;requestAnimationFrame(animate)}
-function fxAtCell(r,c,color,n=12){let rect=board.children[r*N+c].getBoundingClientRect();burst(rect.left+rect.width/2,rect.top+rect.height/2,color,n);if(!raf)requestAnimationFrame(animate)}
-function pop(text,x,y){let e=document.createElement('div');e.className='float';e.textContent=text;e.style.left=x+'px';e.style.top=y+'px';document.body.append(e);setTimeout(()=>e.remove(),900)}
-function place(r,c){if(over)return;if(selected<0){$('message').textContent='Сначала выбери фигуру внизу';return}let p=choices[selected];if(p.used)return;if(!can(p.shape,r,c)){$('message').textContent='Не помещается — попробуй другое место';return}
-p.shape.forEach(([x,y])=>grid[r+y][c+x]=p.color);score+=p.shape.length;
-let rows=[],cols=[];for(let y=0;y<N;y++)if(grid[y].every(Boolean))rows.push(y);for(let x=0;x<N;x++)if(grid.every(row=>row[x]))cols.push(x);
-if(rows.length||cols.length){combo++;let set=new Set();rows.forEach(y=>{for(let x=0;x<N;x++)set.add(y+','+x)});cols.forEach(x=>{for(let y=0;y<N;y++)set.add(y+','+x)});let rect=board.getBoundingClientRect();set.forEach(k=>{let [y,x]=k.split(',').map(Number);fxAtCell(y,x,grid[y][x],15);grid[y][x]=null});score+=set.size*3+(rows.length+cols.length>1?25*rows.length*cols.length:0);pop(rows.length+cols.length>1?'COMBO ×'+(rows.length+cols.length):'BLAST!',rect.left+rect.width/2,rect.top+rect.height*.43);$('app').classList.remove('shake');void $('app').offsetWidth;$('app').classList.add('shake');$('message').textContent=(rows.length+cols.length>1?'🔥 СУПЕР-КОМБО! ':'💥 ЛИНИЯ ВЗОРВАНА!')+' +'+(set.size*3); }
-else combo=0;
-p.used=true;selected=-1;if(score>best){best=score;localStorage.setItem('qubiqBest',best);$('best').textContent=best;pop('НОВЫЙ РЕКОРД!',innerWidth/2,110)}
-$('score').textContent=score;if(choices.every(q=>q.used))makeChoices();render();renderPieces();if(!anyMove()){over=true;$('modalTitle').textContent='💥 Игра окончена';$('modalText').textContent=`Твой счёт: ${score} · Рекорд: ${best}. Готов побить рекорд?`;$('overlay').style.display='flex'}}
-function anyMove(){for(let p of choices)if(!p.used)for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(can(p.shape,r,c))return true;return false}
-$('new').onclick=newGame;$('again').onclick=newGame;$('help').onclick=()=>{$('modalTitle').textContent='Как играть';$('modalText').textContent='Выбирай фигуру, затем коснись клетки поля. Заполняй целые ряды или столбцы — они взорвутся и принесут очки! Очисти сразу несколько линий, чтобы увидеть комбо.';$('overlay').style.display='flex'};
-$('sound').onclick=()=>{sound=!sound;$('sound').textContent=sound?'♫':'♪̸';$('message').textContent=sound?'Звук включён (звуковые эффекты добавим позже)':'Звук выключен'};
+function newGame(){
+grid=Array.from({length:N},()=>Array(N).fill(''));
+score=0;selected=-1;over=false;
+$('score').textContent='0';
+$('message').textContent='Выбери фигуру, затем коснись поля.';
+makeChoices();drawBoard();drawPieces();
+}
+function makeChoices(){
+choices=Array.from({length:3},()=>({
+shape:shapes[Math.floor(Math.random()*shapes.length)],
+color:colors[Math.floor(Math.random()*colors.length)],
+used:false
+}));
+selected=-1;
+}
+function drawBoard(){
+const b=$('board');b.innerHTML='';
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+const el=document.createElement('button');
+el.type='button';el.className='cell'+(grid[r][c]?' filled':'');
+if(grid[r][c])el.style.background=grid[r][c];
+el.setAttribute('aria-label',`Ряд ${r+1}, клетка ${c+1}`);
+el.addEventListener('click',()=>place(r,c));
+b.appendChild(el);
+}
+}
+function drawPieces(){
+const root=$('pieces');root.innerHTML='';
+choices.forEach((p,i)=>{
+const btn=document.createElement('button');
+btn.className='piece'+(selected===i?' selected':'');
+btn.disabled=p.used||over;
+const w=Math.max(...p.shape.map(q=>q[0]))+1;
+const h=Math.max(...p.shape.map(q=>q[1]))+1;
+const mini=document.createElement('div');mini.className='mini';
+mini.style.gridTemplateColumns=`repeat(${w},17px)`;
+for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+const cell=document.createElement('div');cell.className='minicell';
+if(p.shape.some(q=>q[0]===x&&q[1]===y)){
+cell.style.background=p.color;
+cell.style.boxShadow='inset 0 2px #ffffff70,inset 0 -2px #0003';
+}
+mini.appendChild(cell);
+}
+btn.appendChild(mini);
+btn.addEventListener('click',()=>{
+selected=i;drawPieces();
+$('message').textContent='Теперь коснись клетки для размещения.';
+});
+root.appendChild(btn);
+});
+}
+function can(shape,r,c){
+return shape.every(([x,y])=>r+y<N&&c+x<N&&!grid[r+y][c+x]);
+}
+function place(r,c){
+if(over)return;
+if(selected<0){$('message').textContent='Сначала выбери фигуру внизу.';return}
+const p=choices[selected];
+if(p.used)return;
+if(!can(p.shape,r,c)){
+$('message').textContent='Здесь фигура не помещается. Попробуй другое место.';
+return;
+}
+p.shape.forEach(([x,y])=>grid[r+y][c+x]=p.color);
+score+=p.shape.length;
+const rows=[],cols=[];
+for(let y=0;y<N;y++)if(grid[y].every(Boolean))rows.push(y);
+for(let x=0;x<N;x++)if(grid.every(row=>row[x]))cols.push(x);
+if(rows.length||cols.length){
+const clear=new Set();
+rows.forEach(y=>{for(let x=0;x<N;x++)clear.add(y+','+x)});
+cols.forEach(x=>{for(let y=0;y<N;y++)clear.add(y+','+x)});
+clear.forEach(k=>{const [y,x]=k.split(',').map(Number);grid[y][x]=''});
+score+=clear.size*3+((rows.length+cols.length)>1?25*rows.length*cols.length:0);
+$('message').textContent=(rows.length+cols.length>1?'🔥 СУПЕР-КОМБО! ':'💥 ЛИНИЯ ОЧИЩЕНА! ')+`+${clear.size*3} очков`;
+}else $('message').textContent='Хороший ход! Продолжай.';
+p.used=true;selected=-1;
+if(score>best){
+best=score;$('best').textContent=best;
+try{localStorage.setItem('qubiqBest',String(best))}catch(e){}
+}
+$('score').textContent=score;
+if(choices.every(q=>q.used))makeChoices();
+drawBoard();drawPieces();
+if(!choices.some(q=>!q.used&&Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>can(q.shape,r,c))).flat().some(Boolean))){
+over=true;$('message').textContent=`Игра окончена! Счёт: ${score}. Нажми «Новая игра».`;
+drawPieces();
+}
+}
+$('new').addEventListener('click',newGame);
+$('help').addEventListener('click',()=>{$('message').textContent='Выбери фигуру внизу, затем коснись поля. Заполни целый ряд или столбец, чтобы очистить линию.'});
+$('rules').addEventListener('click',()=>{$('message').textContent='Ставь фигуры на свободные клетки. Полный ряд или столбец исчезает и приносит очки.'});
 newGame();
-</script></body></html>
+})();
+</script>
+</body>
+</html>
